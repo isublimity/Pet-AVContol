@@ -254,6 +254,42 @@ if (empty($options['file']) || !is_file(@$options['file']))
 {
     exitMessage('Not set --file or not find file.');
 }
+
+
+function writeToExcell($fileOut,$r)
+{
+
+    $out = fopen($fileOut, 'w');
+
+    $excel_1='<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet; charset=utf-8" />
+</head>
+<body>
+<style>
+.num {
+  mso-number-format:General;
+}
+.text {
+  mso-number-format:"\@"
+}
+</style>
+<table>
+';
+    $excel_2=' </table> </body> </html> ';
+
+    fputs($out,$excel_1);
+    fputs($out,"<tr><td>\n".implode("</td>\t<td x:str class='text'>",array_keys($r[0]))."</td></tr>\n\n");
+// fputcsv($out, array_keys($r[0]),"\t");
+    foreach ($r as $row) {
+        // fputcsv($out, $row,"\t");
+        fputs($out,"<tr><td>\n".implode("</td>\t<td class='text'>",$row)."</td></tr>\n\n");
+    }
+    fputs($out,$excel_2);
+    fclose($out);
+
+}
 // ---------------------
 $filePath=$options['file'];
 $fileOut=$options['out'];
@@ -277,12 +313,7 @@ $columnSet=
         'cs'=>null
     ];
 
+
 $f=new AVDecoder($filePath,$columnSet);
 $r=$f->r2a($filterRange);
 // Store
-$out = fopen($fileOut, 'w');
-fputcsv($out, array_keys($r[0]),"\t");
-foreach ($r as $row) {
-    fputcsv($out, $row,"\t");
-}
-fclose($out);

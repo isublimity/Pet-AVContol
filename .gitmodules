@@ -1,0 +1,3 @@
+[submodule "main/GyverLibs"]
+	path = main/GyverLibs
+	url = https://github.com/AlexGyver/GyverLibs.git
