@@ -1,39 +1,18 @@
-#include "VFD16BT.cpp"
-#include "OnkyoNR509.cpp"
-#include <ArduinoJson.h>
-// ArduinoThread
 // ------------------------------------------------------------------------------------------------------------------------------------------------
-// Led
-byte PIN_LED_THRU = 39;
-byte PIN_LED_PURE = 37;
-
-// Volume encoder
-byte PIN_ENC_VOLA = 2;
-byte PIN_ENC_VOLB = 4;
-
-// Keys
-byte PIN_PAN_KEY_0 = 55;
-byte PIN_PAN_KEY_1 = 54;
-byte PIN_PAN_KEY_2 = 56;
-byte PIN_PAN_KEY_3 = 57;
-byte PIN_BASE_ANA  = 58;
-// ---------- VFD 16-BT-165GINK
-byte PIN_VFD_RST = 43;  // FLDRST - RESET
-byte PIN_VFD_CS = 45;   // FLDCS  - cabel select (enable_pin)
-byte PIN_VFD_CLK = 47;  // FLDCLK - clock pin; CLOCK
-byte PIN_VFD_SDO = 41;  // FLDSDO - data pin
-
-// Control pins
-byte PIN_AV_POWERD = 46;  // POWERD,Pin 0 in JL901A
-byte PIN_AV_VH_CON = 44;  // Power VFD + panel +32V DISPLAY SECTION PART9;  P701B VH_CON1=4 ; MinePin=22
+#include "Settings.h"       // Settings pin
+#include "VFD16BT.cpp"      // VDF Class 
+#include "OnkyoNR509.cpp"   // AV Class 
+#include <ArduinoJson.h>    // Json parse 
+#include "IRremote.h"       // IR 
 // ------------------------------------------------------------------------------------------------------------------------------------------------
-struct PIN_SETS pinList;
-// pinList.POWERD = (byte) 123;
-// pinList.VH_CON = 12;
-const char compile_date[] = __DATE__ " " __TIME__;
-
+// TODO:
+// - ArduinoThread
+// - TaskManagerIO scheduling and event based library for Arudino and mbed
 // ------------------------------------------------------------------------------------------------------------------------------------------------
-// Create Onkyo TX-NR509
+// Other settings: 
+#define DECODE_RC6 // For IRremote
+// ------------------------------------------------------------------------------------------------------------------------------------------------
+// Create base class: Onkyo TX-NR509
 OnkyoNR509 avr(
           PIN_AV_POWERD,
           PIN_AV_VH_CON,
@@ -47,42 +26,65 @@ OnkyoNR509 avr(
           PIN_PAN_KEY_1,
           PIN_PAN_KEY_2,
           PIN_PAN_KEY_3,
-          PIN_ENC_VOLA,
-          PIN_ENC_VOLB
+          PIN_ENCODER_VOL_A,
+          PIN_ENCODER_VOL_B
 );
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------
-
+// IR from IRremote
+IRrecv IRReciver(PIN_IR_RECV);
+// -------------------------------------------------------- SETUP ---------------------------------------------------------------------------------------
 void setup() {
-  
+  // LED internal
   pinMode(LED_BUILTIN, OUTPUT);
-  delay(1000);  // Sleeper for run
+
+  delay(1000);  // Sleeper for setup serial
   Serial.begin(9600);
   Serial.setTimeout(2000);
-  delay(1000);  // Sleeper for run
+  delay(1000);  // Sleeper for setup serial
+  // Done 
   Serial.println("Run setup.k..\n-------------------------------");
-  // OnkyoNR509 Setup
-  avr.setup();
-  avr.setVolume(-50);
-  // avr.LightThruLed(true);
-  // avr.vfd.printStrings("Privet V0.1", compile_date);
-  delay(100);  // Need sleep
-
-
-  
-  pinMode(PIN_BASE_ANA, INPUT);
-  digitalWrite(PIN_BASE_ANA,LOW);
-
-  if (PIN_ENC_VOLA == 2 || PIN_ENC_VOLB == 2) {
-          attachInterrupt(0, encoderTick, CHANGE);
+  // ------- Main setup
+ 
+  // avr 
+  setupAV();
+  delay(100);  // Need sleep for see ...
+  // 
+  if (PIN_ENCODER_VOL_A == 2 || PIN_ENCODER_VOL_B == 2) {
+        attachInterrupt(0, encoderTick, CHANGE);
   }
-        
-
+  // IR...
+  setupExternal();
+  // Tests...
+  setupTestCode();
   return;
 }
+// -------------------- Interrupt\s -------------------------
 void encoderTick() {
   avr.volumeEncoderTick();
 }
+// --------------------  OnkyoNR509 Setup -------------------------
+void setupAV() {
+  avr.setup();
+  avr.setVolume(-50);
+  avr.LightThruLed(true);
+  // Debug on start 
+  const char compile_date[] = __DATE__ " " __TIME__; // For dump 
+  avr.vfd.printStrings("Privet V0.1", compile_date);
+}
+
+// ---------------------------------------------
+void setupExternal() {
+
+  IRReciver.enableIRIn();
+}
+// ---------------------------------------------
+void setupTestCode() {
+
+  
+  // Test code 
+  // pinMode(PIN_BASE_ANA, INPUT);
+  // digitalWrite(PIN_BASE_ANA,LOW);
+}
+
 
 void printHexBin(byte *data, byte length) {
 
@@ -181,28 +183,14 @@ void loop() {
   }
   // ToDo: Rewrite to fast read button.s
   // avr.vfd.printStrings("GO...","...");
-  int start = millis() ;
-  int count = 1;
-  int sensorValue0,sensorValue1,sensorValue2,sensorValue3;
-  for (int i = 0 ; i < count ; i++) {
-      
-      // 
-      avr.ButtonsRead();
-  }
-  // avr.vfd.printStrings("DONE","OK!");
+  // int start = millis() ;
+  //  int msec= millis() - start;
 
-  int msec= millis() - start;
-// Serial.print() ;
-// Serial.println(" msec (30000 calls)") ;
-
-  
-  // float voltage = sensorValue * (5.0 / 1023.0);
-  
   //delay(5250);                       // wait for a second
-  int V10=avr._lastButtonValue0;
-  int V20=analogRead(PIN_PAN_KEY_0);
-  int V11=avr._lastButtonValue1;
-  int V21=analogRead(PIN_PAN_KEY_1);
+  //  int V10=avr._lastButtonValue0;
+  //  int V20=analogRead(PIN_PAN_KEY_0);
+  //  int V11=avr._lastButtonValue1;
+  //  int V21=analogRead(PIN_PAN_KEY_1);
   // -----
  
   avr.vfd.Symbols.DOWN = false;
@@ -220,16 +208,29 @@ void loop() {
   // avr.readEncoder();
   // int ss=digitalRead(PIN_ENC_VOLA);
   // int ssB=digitalRead(PIN_ENC_VOLB);
-  avr.vfd.printStrings(String(avr.getVolume())+" <- VOL ","");
-  avr.renderVolume();
-  delay(50);  
+  // int statusSensor = digitalRead (3);
+  if ( IRReciver.decode(  )) { // если данные пришли
 
-  avr.vfd.Symbols.DOWN  = true;
+    
+    IRReciver.printIRResultShort(&Serial);
+  
+    Serial.println( IRReciver.decodedIRData.address, HEX ); // печатаем данные
+    Serial.println( IRReciver.decodedIRData.command, HEX ); // печатаем данные
+    avr.vfd.printStrings(String(avr.getVolume())+" <- VOL ",String(IRReciver.decodedIRData.command));
+    avr.renderVolume();
+    IRReciver.resume(); // принимаем следующую команду
+    
+  }
+  
+  
+  // delay(50);  
+
+  // avr.vfd.Symbols.DOWN  = true;
   // avr.vfd.Symbols.PLAY  = false;
-  avr.vfd.Symbols.SLEEP = false;
+  //avr.vfd.Symbols.SLEEP = false;
   // avr.vfd.applySymbols();             
   // digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-  delay(5);       
+  //delay(5);       
  
   
   //randsD();

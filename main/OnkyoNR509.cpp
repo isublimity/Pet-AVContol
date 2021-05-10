@@ -7,10 +7,7 @@
 #define VOLUME_ENCODER_MAX 10
 #define VOLUME_ENCODER_MIN -70
 #define VOLUME_ENCODER_STEP 0.5
-
-#ifndef GyverEncoder_h
-#include "GyverLibs/GyverEncoder/GyverEncoder.h"
-#endif
+ 
 
 #ifndef OnkyoNR509_H
 #define OnkyoNR509_H
