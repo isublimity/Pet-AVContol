@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/untitled1_main.ino.cpp
+Settings.h
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/Settings.h
+VFD16BT.cpp
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/VFD16BT.cpp
+OnkyoNR509.cpp
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/OnkyoNR509.cpp
+libs/ArduinoThread/Thread.h
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/libs/ArduinoThread/Thread.h
+OnkyoController.cpp
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/OnkyoController.cpp
+Arduino.h
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/Arduino.h
+

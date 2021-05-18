@@ -1,0 +1,8 @@
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/CMakeFiles/PetAVControl-burn.dir
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/CMakeFiles/PetAVControl-size.dir
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/CMakeFiles/upload.dir
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/CMakeFiles/PetAVControl.dir
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/CMakeFiles/PetAVControl-upload.dir
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/igor/sites/Pet-AVContol/main/cmake-build-debug/CMakeFiles/megaADK_CORE.dir

@@ -1,0 +1,6 @@
+# Hashes of file build rules.
+2c8d4bf67162f80647b6fcf0b639e135 CMakeFiles/PetAVControl-burn
+b4beb5bd893e0a53f13879f6c67018c9 CMakeFiles/PetAVControl-size
+2b896b28260a435b2224b9e7ea9ec238 CMakeFiles/PetAVControl-upload
+dbe0c1391a3fb82056f6e309c807031c PetAVControl_main.ino.cpp
+dbe0c1391a3fb82056f6e309c807031c untitled1_main.ino.cpp
