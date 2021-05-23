@@ -3,15 +3,14 @@
 #include <Arduino.h>
 #endif
 
-
 // My code:
 #include "VFD16BT.cpp"
 
 #define VOLUME_ENCODER_MAX 10
 #define VOLUME_ENCODER_MIN -70
 #define VOLUME_ENCODER_STEP 0.5
- 
-// Other settings: 
+
+// Other settings:
 #define DECODE_RC6 // For IRremote
 
 #ifndef OnkyoNR509_H
@@ -37,7 +36,7 @@ struct PIN_SETS
   byte VFD_CS = 0;
   byte VFD_CLK = 0;
   byte VFD_SDO = 0;
-  byte IR = 0; 
+  byte IR = 0;
 };
 
 class OnkyoNR509
@@ -60,8 +59,7 @@ public:
              byte _KEY_3,
              byte _VOL_A,
              byte _VOL_B,
-             byte _IR_RECV
-             ) : vfd(_VFD_RST, _VFD_CS, _VFD_CLK, _VFD_SDO)
+             byte _IR_RECV) : vfd(_VFD_RST, _VFD_CS, _VFD_CLK, _VFD_SDO)
   {
     // Control
     pins.POWERD = _POWERD;
@@ -82,22 +80,32 @@ public:
     // Vol
     pins.VOLA = _VOL_A;
     pins.VOLB = _VOL_B;
-    pins.IR   = _IR_RECV;
+    pins.IR = _IR_RECV;
 
     //
+    // vfdString1 = new String("");
+    // vfdString2 = new String("");
   }
-  volatile float VolumeValue = 0 ;
-  volatile float _lastRenderVolume = 0 ;
+  volatile float VolumeValue = 0;
+  volatile float _lastRenderVolume = 0;
   volatile int encCounter;
   volatile boolean encoderState0, encoderlastState;
+  volatile boolean stringsIsChange = false; 
+  // volatile String vfdString1;
+  // volatile String vfdString2;
+  
 
-  float getVolume() {
+  float getVolume()
+  {
     return VolumeValue;
   }
-  void setVolume(float value) {
-      if (value > VOLUME_ENCODER_MAX ) value = VOLUME_ENCODER_MAX;
-      if (value < VOLUME_ENCODER_MIN ) value = VOLUME_ENCODER_MIN;
-      VolumeValue = value;
+  void setVolume(float value)
+  {
+    if (value > VOLUME_ENCODER_MAX)
+      value = VOLUME_ENCODER_MAX;
+    if (value < VOLUME_ENCODER_MIN)
+      value = VOLUME_ENCODER_MIN;
+    VolumeValue = value;
   }
   void volumeEncoderTick()
   {
@@ -106,22 +114,46 @@ public:
     encoderState0 = digitalRead(pins.VOLA);
     if (encoderState0 != encoderlastState)
     {
-      // encCounter += 
+      // encCounter +=
       float val = (digitalRead(pins.VOLB) != encoderlastState) ? (-1 * VOLUME_ENCODER_STEP) : VOLUME_ENCODER_STEP;
-      setVolume(VolumeValue+val);
+      setVolume(VolumeValue + val);
 
       encoderlastState = encoderState0;
     }
   }
 
-  void renderVolume(bool force=false ) {
-      if (_lastRenderVolume != VolumeValue || force) {
-        // Value change 
-        vfd.setVolumeSigment(VolumeValue);
-        _lastRenderVolume = VolumeValue;
-      }
+  void setDisplay(String stringOne = "", String stringTwo = "")
+  {
+    // @TODO: Warn! need cache is string is change 
+    // @TODO: Rewrite to [char array] cString 
+    // https://alexgyver.ru/lessons/strings/
+    vfd.applyStrings(stringOne,stringTwo);
+    stringsIsChange=true;
   }
 
+  void renderStrings(bool force = false)
+  {
+    if (stringsIsChange || force) 
+    {
+       // vfd.printStrings(vfdString1, vfdString2);
+       vfd.print();
+       stringsIsChange=false;
+    }
+  }
+  
+  void renderSymbols(bool force = false)
+  {
+      vfd.applySymbols();
+  }
+  void renderVolume(bool force = false)
+  {
+    if (_lastRenderVolume != VolumeValue || force)
+    {
+      // Value change
+      vfd.setVolumeSigment(VolumeValue);
+      _lastRenderVolume = VolumeValue;
+    }
+  }
 
   volatile int buttonState = 0;
 
@@ -135,17 +167,17 @@ public:
     return adc;
   }
 
-  int _lastButtonValue0, _lastButtonValue1, _lastButtonValue2, _lastButtonValue3;
+  int lastButtonValue0, lastButtonValue1, lastButtonValue2, lastButtonValue3;
 
   void ButtonsRead()
   {
     //
     byte ADCSRAoriginal = ADCSRA;
     ADCSRA = (ADCSRA & B11111000) | 4;
-    _lastButtonValue0 = analogRead(pins.KEY0);
-    _lastButtonValue1 = analogRead(pins.KEY1);
-    _lastButtonValue2 = analogRead(pins.KEY2);
-    _lastButtonValue3 = analogRead(pins.KEY3);
+    lastButtonValue0 = analogRead(pins.KEY0);
+    lastButtonValue1 = analogRead(pins.KEY1);
+    lastButtonValue2 = analogRead(pins.KEY2);
+    lastButtonValue3 = analogRead(pins.KEY3);
     ADCSRA = ADCSRAoriginal;
     // if > 1000 => no press
   }
@@ -172,7 +204,7 @@ public:
   void setup()
   {
     // Pins
-     
+
     // IR from IRremote
     // IRrecv IRReciver
 
@@ -190,10 +222,8 @@ public:
     vfd.apply();
     LightThruLed(false);
     LightPureLed(false);
-
-
   }
-  // PureLED 
+  // PureLED
   void LightPureLed(bool flag)
   {
     if (pins.LED_PURE > 0)
@@ -210,10 +240,10 @@ public:
     }
   }
 
-  PIN_SETS getPins() {
+  PIN_SETS getPins()
+  {
     return pins;
   }
-
 
 private:
   struct PIN_SETS pins;
@@ -231,10 +261,10 @@ private:
       digitalWrite(pin, LOW);
     }
   }
-  
+
   void setupPins()
   {
-   // _irRecver
+    // _irRecver
     // _irRecver = new IRrecv(pins.IR);
     // irRecver->enableIRIn();
 
@@ -272,5 +302,5 @@ private:
     pinMode(pins.VOLB, INPUT);
   }
 };
- 
+
 #endif // OnkyoNR509_H
